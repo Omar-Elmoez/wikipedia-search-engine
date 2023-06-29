@@ -1,22 +1,23 @@
-let resultsContainer = document.getElementsByClassName("container")[0]
+let resultsContainer = document.querySelector(".container");
 
-const validateInput = (el) => {
-    if(el.value === ""){
-        resultsContainer.innerHTML = "<p>Type something in the above search input</p>"
-    }else{
-        generateResults(el.value, el)
+function debounce(func, time) {
+    let timer;
+
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func(...args), time);
     }
 }
 
-const generateResults = (searchValue, inputField) => {
+const generateResults = (searchValue) => {
     fetch(
         "https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch="
         + searchValue
     )
     .then(response => response.json())
     .then(data => {
-        let results = data.query.search
-        let numberOfResults = data.query.search.length
+        let results = data.query.search;
+        let numberOfResults = results.length;
         resultsContainer.innerHTML = ""
         for(let i=0; i<numberOfResults; i++) {
             let result = document.createElement("div")
@@ -30,8 +31,8 @@ const generateResults = (searchValue, inputField) => {
             `
             resultsContainer.appendChild(result)
         }
-        if(inputField.value === ""){
-            resultsContainer.innerHTML = "<p>Type something in the above search input</p>"
-        }
     })
+    if(searchValue === '') resultsContainer.innerHTML = "<p>Type something in the above search input</p>";
 }
+
+const fetchData = debounce((Val) => generateResults(Val), 500)
